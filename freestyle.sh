@@ -1,4 +1,0 @@
-
-node --version
-
-maven --version
