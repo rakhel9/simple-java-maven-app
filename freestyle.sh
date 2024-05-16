@@ -1,4 +1,8 @@
 
 node -v
 
-maven -v
+mvn -v
+
+npm -v
+
+java -v
