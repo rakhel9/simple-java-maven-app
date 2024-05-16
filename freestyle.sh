@@ -1,0 +1,4 @@
+
+node -v
+
+maven -v
