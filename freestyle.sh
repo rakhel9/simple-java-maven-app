@@ -1,4 +1,4 @@
 
-node -v
+node --version
 
-maven -v
+maven --version
