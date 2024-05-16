@@ -5,4 +5,4 @@ mvn -v
 
 npm -v
 
-java -v
+java -version
