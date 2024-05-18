@@ -85,13 +85,16 @@ pipeline {
 				//In this case this parameter is available only within this scope.
 				//hence accessed as ${NAME} not ${params.NAME}
 				parameters {
-					choice(name: "ENV",choices: ['dev','staging','prod'], description: "")				
+					choice(name: "ENV1",choices: ['dev','staging','prod'], description: "")
+					choice(name: "ENV2",choices: ['dev','staging','prod'], description: "")
+					//This provides user to input multiple selections				
 				}					 
 			}
             steps {
             	script {
             		gv.deployApp()
-            		echo "Deploying to ${ENV}"
+            		echo "Deploying to ${ENV1}"
+            		echo "Deploying to ${ENV2}"
             	}
                /*	withCredentials([
                		usernamePassword(credentials: 'server-credentials',usernameVariable: USER,passwordVariable: PWD)	
