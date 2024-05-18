@@ -3,7 +3,7 @@
 pipeline {
     agent any
 
-    parameters {
+    parameters { //Allows users to input parameters before the build starts
     	//string(name: "VERSION",defaultValue: "", description: "version to deploy on prod")
     	choice(name: "VERSION",choices: ['1.1.0','1.2.0','1.3.0'], description: "")
      	booleanParam(name:"executeTests",defaultValue: true,description: "")
@@ -11,6 +11,8 @@ pipeline {
     //provides external configuration to yuor build to change some behavior
     //ex.select which version of application you wanna deploy to stagin server
     //in that case you'll define the selection in parameters section.
+    //parameter defined here are global and are available throughout the script.
+    //hence its accessed as "params.NAME"
     //Types of Parameter
 	//1.string(name,defaultValue,description)
 	//2.choice(name,choices,description)
@@ -76,9 +78,20 @@ pipeline {
         }
 		
 		stage('Deploy') {
+			input { //input block allows user input before a stage
+				message "Select the environment to deploy to" //Parameter 1
+				//its a required field & we tell a user what they're gonna input
+				ok "Environment Confirmed" //ok is for when user confirms their selection
+				//In this case this parameter is available only within this scope.
+				//hence accessed as ${NAME} not ${params.NAME}
+				parameters {
+					choice(name: "ENV",choices: ['dev','staging','prod'], description: "")				
+				}					 
+			}
             steps {
             	script {
             		gv.deployApp()
+            		echo "Deploying to ${ENV}"
             	}
                /*	withCredentials([
                		usernamePassword(credentials: 'server-credentials',usernameVariable: USER,passwordVariable: PWD)	
