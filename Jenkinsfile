@@ -23,7 +23,7 @@ pipeline {
     }
 
     environment {
-    	NEW_VERSION='1.3.0'
+    	NEW_VERSION='1.3.0' 
     	SERVER_CRED=credentials('server-credentials')//uses ID to bind the credentials
     	//Not best practice to declare credentials as global variable.better to use 
     	//inside wrappper syntax "syntax([objectName(.....)]){script..}" directly 
@@ -31,14 +31,31 @@ pipeline {
     }
 	*/
     stages {
-    	stage('Build') {
+    	stage("init") {
+    		steps {
+    			script {
+    				gv = load "script.groovy"
+    				 //variable = load "script name"
+    			    // this variable holds the groovy script & we'd make it globally 
+    			   //available so that we can use it in all the stages by defining
+    		      //it outside the pipeline block
+    		     //All Environment variables in Jenkinsfile are available in groovy script   
+    			}	
+    		}	
+    	}
+    	
+    	stage('Build') {  //"init" stage loads the groovy script from inside the "script" block
     	  /*when {
     			expression {
     				BRANCH_NAME == "dev" || BRANCH_NAME == 'master' && CODE_CHANGES == true	
     			}	
     	 	}*/ 
         	steps {
-    	    	echo 'Building the App'
+        		script {
+        			gv.buildApp()
+        		}
+        	
+    	    	//echo 'Building the App'
     	        // sh "mvn install"
     	        //echo "building version ${NEW_VERSION}" //use ""
     	    }
@@ -52,19 +69,23 @@ pipeline {
         		}
         	}
             steps {
-                echo 'Testing the APP'
+            	script {
+            		gv.testApp()
+            	}    
             }
         }
 		
 		stage('Deploy') {
             steps {
-                echo 'Deploying the App'
+            	script {
+            		gv.deployApp()
+            	}
                /*	withCredentials([
                		usernamePassword(credentials: 'server-credentials',usernameVariable: USER,passwordVariable: PWD)	
                	]) {
                		sh "some script ${USER} ${PWD}"
                	}*/
-               	echo "Deploying Version ${params.VERSION}" 
+              	//echo "Deploying Version ${params.VERSION}" 
             }
 	    }	
     }
