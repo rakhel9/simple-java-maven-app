@@ -99,8 +99,7 @@ pipeline {
 //input iside script will have a different synax. 
             steps {
             	script {
-            		env.ENV = input message "Select the environment to deploy to",ok "Environment Confirmed",
-            		parameters:[choice(name: "ENV1",choices: ['dev','staging','prod'], description: "")]
+            		env.ENV = input message "Select the environment to deploy to", ok "Environment Confirmed", parameters:[choice(name: "ENV1", choices: ['dev','staging','prod'], description: "")]
  //this is how we define a global variable env.VARNAME = value ,available to other stages 
             		gv.deployApp()
             		echo "Deploying to ${ENV}"
