@@ -46,7 +46,8 @@ pipeline {
     		}	
     	}
     	
-    	stage('Build') {  //"init" stage loads the groovy script from inside the "script" block
+    	stage('Build') { 
+    	 //"init" stage loads the groovy script from inside the "script" block
     	  /*when {
     			expression {
     				BRANCH_NAME == "dev" || BRANCH_NAME == 'master' && CODE_CHANGES == true	
@@ -78,7 +79,7 @@ pipeline {
         }
 		
 		stage('Deploy') {
-			input { //input block allows user input before a stage
+			/*input { //input block allows user input before a stage
 				message "Select the environment to deploy to" //Parameter 1
 				//its a required field & we tell a user what they're gonna input
 				ok "Environment Confirmed" //ok is for when user confirms their selection
@@ -89,15 +90,26 @@ pipeline {
 					choice(name: "ENV2",choices: ['dev','staging','prod'], description: "")
 					//This provides user to input multiple selections				
 				}					 
-			}
+			}*/
+//Another common way of using the input in jenkins file is assign it directlt to 
+//Env variable
+//if we've 1 choice parameter we can assign the input result directly to a variable.
+//if we wanna directly assign the input to a variable,we've to do it inside script section.
+//because this part of groovy script.Hence we've to define input inside the script section.
+//input iside script will have a different synax. 
             steps {
             	script {
+            		env.ENV = input message "Select the environment to deploy to",ok "Environment Confirmed",
+            		parameters:[choice(name: "ENV1",choices: ['dev','staging','prod'], description: "")]
+ //this is how we define a global variable env.VARNAME = value ,available to other stages 
             		gv.deployApp()
-            		echo "Deploying to ${ENV1}"
-            		echo "Deploying to ${ENV2}"
+            		echo "Deploying to ${ENV}"
+            		//echo "Deploying to ${ENV1}"
+            		//echo "Deploying to ${ENV2}"
             	}
                /*	withCredentials([
-               		usernamePassword(credentials: 'server-credentials',usernameVariable: USER,passwordVariable: PWD)	
+               		usernamePassword(credentials: 'server-credentials',
+               		usernameVariable: USER,passwordVariable: PWD)	
                	]) {
                		sh "some script ${USER} ${PWD}"
                	}*/
