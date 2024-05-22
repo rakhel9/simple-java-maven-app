@@ -14,7 +14,11 @@ pipeline {
 				script {
 					echo "Building th docker image"
 					withCredentials([usernamePassword(credentialsId:"docker-hub-pvt-repo",
-					userName:"UNAME",passWord:"PWD")])
+					usernameVariable:"UNAME",passwordVariable:"PASS")]){
+						sh "docker build -t rakhel/java-maven-app:3.0 ."
+						sh "echo $PASS | docker login -u $UNAME --password-stdin"
+						sh "docker push rakhel/java-maven-app:3.0"		
+					}
 				}
 			}
 		}
