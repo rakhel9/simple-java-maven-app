@@ -14,7 +14,7 @@ pipeline {
 				script {
 					echo "Building the Application"
 					//sh "mvn package"
-					gv.BuildJAR()
+					gv.buildJAR()
 				}
 			}
 		}
@@ -22,7 +22,7 @@ pipeline {
 			steps {
 				script {
 					echo "Building th docker image"
-					gv.BuildImage()
+					gv.buildImage()
 				  /*withCredentials([usernamePassword(credentialsId:"docker-hub-pvt-repo",
 					usernameVariable:"UNAME",passwordVariable:"PASS")]){
 						sh "docker build -t rakhel/java-maven-app:3.0 ."
