@@ -5,7 +5,7 @@ def buildJAR() {
 
 def buildImage() {
 	echo "Testing the Applicaion"
-	withCredential([usernamePassword(credentialsID:"docker-hub-pvt-repo",
+	withCredentials([usernamePassword(credentialsId:"docker-hub-pvt-repo",
 	usernameVariable:"UNAME",passwordVariable:"PWD")]) {
 		sh "echo $PWD | docker login -u $UNAME --password-stdin"
 		sh "docker build -t rakhel/java-maven-app ."
