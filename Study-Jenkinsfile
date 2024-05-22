@@ -282,9 +282,9 @@ pipeline {
             	//credentials & credentials binding plugins are required for this.   
             steps {	
                /*withCredentials([
-               		usernamePassword(credentials: 'server-credentials',
+               		usernamePassword(credentialsId: 'server-credentials',
 
-               		usernameVariable: USER,passwordVariable: PWD)	
+               		usernameVariable: 'USER',passwordVariable: 'PWD')	
                	]) {
                		sh "some script ${USER} ${PWD}"    
                	}*/

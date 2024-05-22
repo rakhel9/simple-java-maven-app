@@ -1,7 +1,7 @@
 pipeline {
 	agent any
 	stages {
-		stage("Build") {
+		stage("Building JAR") {
 			steps {
 				script {
 					echo "Building the Application"
@@ -9,10 +9,12 @@ pipeline {
 				}
 			}
 		}
-		stage("Test") {
+		stage("Building Docker Image") {
 			steps {
 				script {
-					echo "Testing the Application"
+					echo "Building th docker image"
+					withCredentials([usernamePassword(credentialsId:"docker-hub-pvt-repo",
+					userName:"UNAME",passWord:"PWD")])
 				}
 			}
 		}
