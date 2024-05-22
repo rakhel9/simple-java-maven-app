@@ -7,8 +7,8 @@ def buildImage() {
 	echo "Testing the Applicaion"
 	withCredentials([usernamePassword(credentialsId:"docker-hub-pvt-repo",
 	usernameVariable:"UNAME",passwordVariable:"PWD")]) {
-		sh "docker build -t rakhel/java-maven-app ."
 		sh "echo $PWD | docker login -u $UNAME --password-stdin"
+		sh "docker build -t rakhel/java-maven-app:4.0 ."
 		sh "docker push rakhel/java-maven-app:4.0"
 	}
 }
