@@ -1,5 +1,76 @@
-//CODE_CHANGES = getGitChanges()
+//pipeline syntax--|-scripted=first syntax,groovy engine,highly flexible,advanced,dificult
 
+				//	node {
+						
+				//	}
+
+			    // |-declarative=more recent, notthat powerful,easier to start. 
+
+					//has a predefined structure, execute multiple tasks in parallel.
+					//supports user input , allow conditional statements
+					//where as freestyle is reliant on plugins & UI ,different plugins in
+					//multiple jobs & managing those have high maintenance cost.
+
+					//scripted pipelines using groovy will be easy to write those conditionals
+					//we can set variables,can've complex logic w/o being limited by ui & plugins.
+
+					//chained freestyled builds (6-7 jobs) is hard to manage & maintain.
+					//Changing a build tool in all jobs is daunting task using UI but easy
+				 //in the script.
+
+					//pipeline is a superset of multiple freestyle jobs in a simplistic way.   
+
+					/*pipeline {  pipeline must be top level. (required attribute)
+
+						agent any (required attribute)
+
+						//this build is gonna run on any available jenkins agent
+						//agent = node/executer on that node.(Relevant for jenkins cluster) 
+						//any = run with the next available agent.
+						
+						stages { (required attribute) 
+
+						//this is where whole work actually happens.
+						//we've different stages of that pipeline.
+						//inside stages we'll define stage name "stage("test")" & steps. 
+						//we can define as many stages as we want.
+						
+						//innitial declarative step is performed by jenkins before build
+						//step is to checkout source code manager from configuration setting	
+							stage("build") {
+								steps {
+									sh "npm install"
+									sh "npm build"
+								//inside steps we define scripts that executes some command
+								//under jenkins agent.
+									
+								}
+							}
+							stage("test") {
+								steps {
+									//all the text execution scripts will be here								
+								}
+							}
+							stage("deploy") {
+								steps {
+									//deployment scripts will be here.							
+								}
+							}
+						}
+					}*/
+
+
+CODE_CHANGES = getGitChanges()
+
+//CODE_CHANGES is a variable defined by us outside of the pipeline {}.
+//block to make it a global variable & available to use by all stages.
+
+
+def gv
+
+//defining gv variable "which holds the groovy script" outside the pipeline block to make
+//it available globally for all stages inside the jenkins file.
+  
 pipeline {
     agent any
 
@@ -9,64 +80,127 @@ pipeline {
      	booleanParam(name:"executeTests",defaultValue: true,description: "")
     }
     //provides external configuration to yuor build to change some behavior
-    //ex.select which version of application you wanna deploy to stagin server
+    //ex.select which version of application you wanna deploy to staging server
     //in that case you'll define the selection in parameters section.
-    //parameter defined here are global and are available throughout the script.
-    //hence its accessed as "params.NAME"
+
+    //parameter defined here are global and are available for all stages in the script.
+	//parameters are suitable usage  for expressions.
+
+	        /*stage('Test') {
+	        	when {
+	        		expression {
+	        			params.executeTests == true
+	        			//if executeTests parameters is set to true only then run test
+	        			//stage otherwise skip that.		
+	        		}
+	        	}
+	            steps {
+	            	script {
+	            		gv.testApp()
+	            	}    
+	            }
+	        }*/
+    //hence its accessed as "params.NAME" 
+
+
     //Types of Parameter
 	//1.string(name,defaultValue,description)
 	//2.choice(name,choices,description)
 	//3.booleanParam(name,defaultValue,description)
 	/*
-    tools{ //Access Build tools for your projects.
-		maven "Maven" //(tool "Name of the tool") defined in global tool configuration
-		//gradle    //this will make the build tool available in all the stages			
-		//jdk    	//only 3 build tools supports this methord of assignment.
+
+	
+    tools{ 
+	//Access Build tools for your projects.
+
+		maven "Maven" 
+		//gradle    		
+		//jdk    	
+
+ 	//toolname "Name Defined in jenkins"
+	//"Name of the tool" must be preconfigured in global tool configuration in jenkins. 
+	//this will make the build tool commands available in all the stages
+	//only 3 build tools supports this methord of assignment.	
     }
 
     environment {
+    	//we can define our own environment variables here apart from the jenkins variables.
+		//whatever env variable defined here is available for all stages in the pipeline
+    	
     	NEW_VERSION='1.3.0' 
-    	SERVER_CRED=credentials('server-credentials')//uses ID to bind the credentials
+    	SERVER_CRED=credentials('server-credentials')
+
+    	//Once we define credentials in jenkins , we can use that in jenkins file.
+    	//"credentials("cred-ID")" binds the provided credentials with the env variable.
+    	//we need credential binding plugin for that.  
     	//Not best practice to declare credentials as global variable.better to use 
-    	//inside wrappper syntax "syntax([objectName(.....)]){script..}" directly 
+     	//inside wrappper syntax "syntax([objectName(.....)]){script..}" directly 
     	//on that stage itself.
     }
 	*/
     stages {
-    	stage("init") {
+    	stage("init") { 
+    	//"init" stage imports and lets us use the groovy functions from the groovy script
+       // in the jenkins file. "return this" also helps to import the functions in the
+       //jenkins file.
     		steps {
     			script {
     				gv = load "script.groovy"
-    				 //variable = load "script name"
-    			    // this variable holds the groovy script & we'd make it globally 
-    			   //available so that we can use it in all the stages by defining
-    		      //it outside the pipeline block
-    		     //All Environment variables in Jenkinsfile are available in groovy script   
+    				  //script {} block loads the grovy commands & "gv" variable holds the  
+    				 //imported groovy script.But to makes the variable globally available 
+    				//we can define it outside the pipeline block. 
     			}	
     		}	
-    	}
+    	} 
     	
     	stage('Build') { 
-    	 //"init" stage loads the groovy script from inside the "script" block
     	  /*when {
+    	  
+    	  //when block define conditionals for each stage(only run tests on dev branch builds)
+    	  
     			expression {
-    				BRANCH_NAME == "dev" || BRANCH_NAME == 'master' && CODE_CHANGES == true	
+    			//expression block defines the boolean expressions.
+    			
+    				BRANCH_NAME == "dev" || BRANCH_NAME == 'master' && CODE_CHANGES == true
+
+    				//BRANCH_NAME is a jenkins provided environment variable pointing to the
+    				//current/active branch name in the build.(env.BRANCH_NAME== is same as
+    				//BRANCH_NAME== ).
+
+    				//CODE_CHANGES is a variable defined by us outside of the pipeline {}.
+    				//block to make it a global variable & available to use by all stages. 
+    				//CODE_CHANGES = getGitChanges() 
+
+    				//getGitChanges() is a groovy function that checks for any code changes
+    				// and sets the boolean value to that to the variable.
+
+    				//BUILD_NUMBER = jenkins variable pointing to current build number
+    				//so that we can use it in versioning. 
+
+    				// https://URL/env-vars.html=lists all jenkins environmental variables.  
     			}	
     	 	}*/ 
         	steps {
         		script {
         			gv.buildApp()
+        			//the way to access a groovy script function. variable.function()
+        			//gv variable holds the groovy script & buildApp() is a function
+        			//inside the groovy script.
         		}
         	
     	    	//echo 'Building the App'
     	        // sh "mvn install"
     	        //echo "building version ${NEW_VERSION}" //use ""
+
+    	        //we can access the user created environment variable like this "${NAME}"
     	    }
     	}
         stage('Test') {
         	when {
         		expression {
         			params.executeTests == true
+        			//praams.executeTests also defines the same 
+
         			//execute this stage only when 
         			//executeTests parameters is set to true.		
         		}
@@ -79,26 +213,39 @@ pipeline {
         }
 		
 		stage('Deploy') {
-			/*input { //input block allows user input before a stage
-				message "Select the environment to deploy to" //Parameter 1
+			/*input { 
+
+			//input block allows user input before a stage
+
+				message "Select the environment to deploy to" 
+
 				//its a required field & we tell a user what they're gonna input
-				ok "Environment Confirmed" //ok is for when user confirms their selection
-				//In this case this parameter is available only within this scope.
-				//hence accessed as ${NAME} not ${params.NAME}
+
+				ok "Environment Confirmed" 
+
+				//ok is for when user confirms their selection
+
 				parameters {
+					choice(name: "ENV",choices: ['dev','staging','prod'], description: "")
 					choice(name: "ENV1",choices: ['dev','staging','prod'], description: "")
 					choice(name: "ENV2",choices: ['dev','staging','prod'], description: "")
-					//This provides user to input multiple selections				
-				}					 
+			
+				}
+				//this parameter block is same as global parameter block but limited 
+			   //to deploy stage only    					 
 			}*/
-//Another common way of using the input in jenkins file is assign it directlt to 
-//Env variable
-//if we've 1 choice parameter we can assign the input result directly to a variable.
-//if we wanna directly assign the input to a variable,we've to do it inside script section.
-//because this part of groovy script.Hence we've to define input inside the script section.
-//input iside script will have a different synax. 
             steps {
             	script {
+             	//Instead of using input block we can also use the input by assinging it 
+               //directly to Environment Variable but with a slightly different syntax.
+
+//env.Z=input message:"",ok:"",parameters:[choice(name:"Y",choices:["A","B"],description:"")]
+
+              //if we've 1 choice parameter we can assign the input result directly to a 
+             //variable. We've to define it inside script section cuz its part of groovy.
+         	//that variable becomes a global variable and other stages will have access 
+           //to it as well. If we define input via variable then no need for input block.
+          
             		env.ENV = input message:"Select the environment to deploy to",
             		ok:"Environment Confirmed",parameters:[choice(
             		name: "ENV1",choices: ['dev','staging','prod'], description: "")]
@@ -107,26 +254,63 @@ pipeline {
             		echo "Deploying to ${ENV}"
             		//echo "Deploying to ${ENV1}"
             		//echo "Deploying to ${ENV2}"
+
+            		//In this case this parameter is available only within this stage.
+            		//hence accessed as ${NAME} not ${params.NAME}
             	}
-               /*	withCredentials([
+            }	
+               	
+			
+            steps {
+            		echo 'deploying the application'
+            		sh "${SERVER_CREDENTIALS}"		
+            }
+            	//if we need that credential only in one stage ,it makes sense to read them 
+            	//from jenkins in that stage only instead of referencing globally.
+            	//so insted of defining credentials inside the environment block we can 
+            	//directly define them for a single stage inside of a wrapper syntax. 
+            	//withCredentials([..]){..} wrapper Allows various kinds of 
+            	//credentials (secrets) to be used in idiosyncratic ways.
+            	//this wrapper takes an object "[..]" as its parameter.
+            	//usenamePassword() object is a function that finds me the password
+            	// & username of that credentials indivisually.so we passin as an object.
+
+            	//to find that credentials from jenkins we'll passin "credentials:cred-ID" 
+            	//as a parameter inside usenamePassword() function and to store that 
+            	//username and password in a variable for further use we passin another 
+            	//parameter "usernameVariable: VAR1" & "passwordVariable: VAR2".
+            	//credentials & credentials binding plugins are required for this.   
+            steps {	
+               /*withCredentials([
                		usernamePassword(credentials: 'server-credentials',
+
                		usernameVariable: USER,passwordVariable: PWD)	
                	]) {
-               		sh "some script ${USER} ${PWD}"
+               		sh "some script ${USER} ${PWD}"    
                	}*/
-              	//echo "Deploying Version ${params.VERSION}" 
+              	echo "Deploying Version ${params.VERSION}"
+              	//accesing a parameter block variable by param.VERSION 
             }
 	    }	
     }
-    /*post { //Build status or build status change
-    	always {
+    /*post { 
+    
+    //post attribute execute some logic after all stages executed.
+    //in post block you define expressions of build status or build status change.
+
+    	always { 
     		echo "send an email about build condition"
+    		//these scripts always gets executed no matter what happens to the build.
     	}
+
     	success {
     		echo "build is success"
+    		//these scripts only relevant if the build succeeded.
     	}
+
 		failure {
 			echo "build failed"
+			//these scripts only relevant if the build failed.
 		}
     }*/
 }
