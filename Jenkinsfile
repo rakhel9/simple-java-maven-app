@@ -1,41 +1,38 @@
-def gv
 pipeline {
-	agent any
+	agent none
 	stages {
-		stage("init") {
+		stage("Test") {
 			steps {
 				script {
-					gv=load "script.groovy"
+					echo "Testing the Application"
+					echo "Executing Pipeline for $BRANCH_NAME"
 				}
 			}
 		}
-		stage("Building JAR") {
+		stage("Build") {
+			when {
+				expression {
+					BRANCH_NAME == "master"
+					//BRANCH_NAME is jenkins provided Environmental variable
+				   //available only in multibranch pipelines which points to
+				  //the name of the currently active SCM branch in Jenkins. 
+				}
+			}
 			steps {
 				script {
 					echo "Building the Application"
-					//sh "mvn package"
-					gv.buildJAR()
-				}
-			}
-		}
-		stage("Building Docker Image") {
-			steps {
-				script {
-					echo "Building th docker image"
-					gv.buildImage()
-				  /*withCredentials([usernamePassword(credentialsId:"docker-hub-pvt-repo",
-					usernameVariable:"UNAME",passwordVariable:"PASS")]){
-						sh "docker build -t rakhel/java-maven-app:3.0 ."
-						sh "echo $PASS | docker login -u $UNAME --password-stdin"
-						sh "docker push rakhel/java-maven-app:3.0"		
-					}*/
 				}
 			}
 		}
 		stage("Deploy") {
+			when {
+				expression {
+					BRANCH_NAME == "master"
+				}
+			}
 			steps {
 				script {
-					echo "Deploying the Application:"
+					echo "Deploying the Application"
 				}
 			}
 		}
