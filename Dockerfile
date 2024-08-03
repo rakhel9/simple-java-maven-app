@@ -1,4 +1,4 @@
-FROM openjdk:19-jdk-alpine3.16
+FROM openjdk:24-jdk-slim
 
 WORKDIR /usr/app
 
