@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven3.9'
+    }
+    stages {
+        stage('build jar') {
+            steps {
+                script {
+                    echo 'Building the app..'
+                    sh 'mvn package'
+                }
+            }
+        }
+        stage('build image') {
+            steps {
+                script {
+                    echo 'Building the app..' 
+                    withCredentials(
+                        [usernamePassword(credentialId: 'dockerhub-credential',passwordVariable: 'PASS' usernameVariable: 'USER')]
+                        sh 'docker build -t rakhel/jenkins-build:jma-2.0 .'
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                        sh 'docker push rakhel/jenkins-build:jma-2.0'    
+                    )
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                script {
+                    echo 'deploying the application.'
+                }
+            }
+        }  
+    }
+}
