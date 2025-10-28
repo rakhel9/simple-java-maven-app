@@ -1,40 +1,37 @@
+def gv
 pipeline {
-	agent none
-	stages {
-		stage("Test") {
-			steps {
-				script {
-					echo "Testing the Application"
-					echo "Executing Pipeline for $BRANCH_NAME"
-				}
-			}
-		}
-		stage("Build") {
-			when {
-				expression {
-					BRANCH_NAME == "master"
-					//BRANCH_NAME is jenkins provided Environmental variable
-				   //available only in multibranch pipelines which points to
-				  //the name of the currently active SCM branch in Jenkins. 
-				}
-			}
-			steps {
-				script {
-					echo "Building the Application"
-				}
-			}
-		}
-		stage("Deploy") {
-			when {
-				expression {
-					BRANCH_NAME == "master"
-				}
-			}
-			steps {
-				script {
-					echo "Deploying the Application"
-				}
-			}
-		}
-	}
+    agent any
+    tools {
+        maven 'maven3.9'
+    }
+    stages {
+        stage('init'){
+            steps {
+                script {
+                    gv = load 'script.groovy'
+                }
+            }
+        }
+        stage('build jar') {
+            steps {
+                script {
+                    gv.buildJar()
+                }
+            }
+        }
+        stage('build image') {
+            steps {
+                script {
+                    gv.buildImage()
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                script {
+                    gv.deployImage() 
+                }
+            }
+        }  
+    }
 }
