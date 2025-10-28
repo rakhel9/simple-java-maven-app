@@ -1,18 +1,31 @@
 def gv
 pipeline {
     agent any
+
     tools {
         maven 'maven3.9'
     }
     stages {
         stage('init'){
             steps {
-                script {
+                script{
                     gv = load 'script.groovy'
                 }
             }
         }
+        stage('test') {
+            steps {
+                script {
+                    gv.test()
+                }
+            }
+        }
         stage('build jar') {
+            when {
+                expression {
+                    BRANCH_NAME == 'master'
+                }
+            }
             steps {
                 script {
                     gv.buildJar()
@@ -20,6 +33,11 @@ pipeline {
             }
         }
         stage('build image') {
+            when {
+                expression {
+                    BRANCH_NAME == 'master'
+                }
+            }
             steps {
                 script {
                     gv.buildImage()
@@ -27,9 +45,14 @@ pipeline {
             }
         }
         stage('deploy') {
+            when {
+                expression {
+                    BRANCH_NAME == 'master'
+                }
+            }
             steps {
                 script {
-                    gv.deployImage() 
+                    gv.deployImage()       
                 }
             }
         }  
