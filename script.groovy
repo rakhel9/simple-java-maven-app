@@ -1,23 +1,19 @@
-def buildJAR() {
-	echo "Building the Applicaion"
-	sh "mvn package"
+def buildJar() {
+    echo 'Building the app..'
+    sh 'mvn package'
 }
 
 def buildImage() {
-	echo "Testing the Applicaion"
-	withCredentials([usernamePassword(credentialsId:"docker-hub-pvt-repo",
-	usernameVariable:"UNAME",passwordVariable:"PWD")]) {
-		sh "echo $PWD | docker login -u $UNAME --password-stdin"
-		sh "docker build -t rakhel/java-maven-app:4.0 ."
-		sh "docker push rakhel/java-maven-app:4.0"
-	}
+    echo 'Building the app..' 
+    withCredentials([usernamePassword(credentialsId: 'dockerhub-credential',passwordVariable: 'PASS',usernameVariable: 'USER')]) {
+        sh 'docker build -t rakhel/jenkins-build:jma-4.0 .'
+        sh 'echo $PASS | docker login -u $USER --password-stdin'
+        sh 'docker push rakhel/jenkins-build:jma-4.0'    
+    }
 }
 
-/*def deployApp() {
-	echo "Deploying the Applicaion"
-	echo "Deploying App Version ${params.VERSION}"
-}*/
-//VERSION is Pameterized env variable defined in Jenkinsfile & accessed using params.VERSION
-//All the environmental variables in the jenkins file are available in the groovy script.
+def deployImage() {
+    echo 'deploying the application.'
+}
+
 return this
-//return keyword 
