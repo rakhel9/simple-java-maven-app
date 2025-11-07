@@ -1,0 +1,9 @@
+name: Hello
+on: [push]
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Hello from $GITHUB_REF on $GITHUB_SHA"
